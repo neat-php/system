@@ -10,7 +10,7 @@ class Handlers
     /**
      * Handler constructor
      *
-     * @param callable[] $handlers
+     * @param array|callable[] $handlers
      */
     public function __construct(array $handlers = [])
     {
