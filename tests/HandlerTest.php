@@ -64,6 +64,17 @@ class HandlerTest extends TestCase
     }
 
     /**
+     * Test remove
+     */
+    public function testRemove()
+    {
+        $handler = new Handler(['x', 'y', 'z']);
+        $handler->remove('y');
+
+        $this->assertSame(['x', 'z'], $handler->all());
+    }
+
+    /**
      * Test offset
      */
     public function testOffset()

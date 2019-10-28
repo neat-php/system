@@ -66,7 +66,7 @@ class Handler
      */
     public function remove($handler)
     {
-        unset($this->handlers[$this->offset($handler)]);
+        array_splice($this->handlers, $this->offset($handler), 1);
     }
 
     /**
