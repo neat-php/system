@@ -4,10 +4,23 @@ namespace Neat\System\Test;
 
 use Neat\Service\Container;
 use Neat\System\Kernel;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 class KernelTest extends TestCase
 {
+    /**
+     * @return Container|MockObject
+     */
+    protected function services(): Container
+    {
+        /** @var Container $services */
+        $services = $this->getMockBuilder(Container::class)->getMock();
+
+        return $services;
+    }
+
     /**
      * Test empty
      */
@@ -31,35 +44,60 @@ class KernelTest extends TestCase
 
     public function testBootstrap()
     {
-        $kernel = new Kernel();
+        $services = $this->services();
+        $services
+            ->expects($this->once())
+            ->method('call')
+            ->with(CallableMock::class);
 
+        $kernel = new Kernel($services);
+        $kernel->bootstrappers()->add(CallableMock::class);
+        $kernel->run();
     }
 
     public function testFail()
     {
-        $kernel = new Kernel();
+        $services = $this->services();
 
+        $kernel = new Kernel($services);
+        $kernel->failers()->add(CallableMock::class);
+        $kernel->run();
+
+        $services
+            ->expects($this->once())
+            ->method('call')
+            ->with(CallableMock::class);
+
+        $kernel->handlers()->add(function () {
+            throw new RuntimeException('Failed!');
+        });
+        $kernel->run();
     }
 
     public function testTerminate()
     {
-        $kernel = new Kernel();
+        $services = $this->services();
+        $services
+            ->expects($this->once())
+            ->method('call')
+            ->with(CallableMock::class);
 
+        $kernel = new Kernel($services);
+        $kernel->terminators()->add(CallableMock::class);
+        $kernel->run();
     }
 
     public function testHandle()
     {
-        $callable = $this->createPartialMock(CallableMock::class, ['__invoke']);
-        $callable->expects($this->once())->method('__invoke')->with();
+        $services = $this->services();
+        $services
+            ->expects($this->once())
+            ->method('call')
+            ->with(CallableMock::class);
 
-        $kernel = new Kernel();
-        $kernel->handle();
-    }
-
-    public function testRun()
-    {
-        $kernel = new Kernel();
-
+        $kernel = new Kernel($services);
+        $kernel->handlers()->add(CallableMock::class);
+        $kernel->run();
     }
 
     /**

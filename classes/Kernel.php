@@ -18,16 +18,16 @@ class Kernel
     /** @var Container */
     protected $services;
 
-    /** @var Handlers */
+    /** @var Handler */
     protected $bootstrappers;
 
-    /** @var Handlers */
+    /** @var Handler */
     protected $terminators;
 
-    /** @var Handlers */
+    /** @var Handler */
     protected $handlers;
 
-    /** @var Handlers */
+    /** @var Handler */
     protected $failers;
 
     /**
@@ -38,10 +38,10 @@ class Kernel
     public function __construct(Container $services = null)
     {
         $this->services      = $services ?? new Container();
-        $this->bootstrappers = new Handlers(self::BOOTSTRAPPERS);
-        $this->terminators   = new Handlers(self::TERMINATORS);
-        $this->handlers      = new Handlers(self::HANDLERS);
-        $this->failers       = new Handlers(self::FAILERS);
+        $this->bootstrappers = new Handler(self::BOOTSTRAPPERS);
+        $this->terminators   = new Handler(self::TERMINATORS);
+        $this->handlers      = new Handler(self::HANDLERS);
+        $this->failers       = new Handler(self::FAILERS);
     }
 
     /**
@@ -57,9 +57,9 @@ class Kernel
     /**
      * Get bootstrappers
      *
-     * @return Handlers
+     * @return Handler
      */
-    public function bootstrappers(): Handlers
+    public function bootstrappers(): Handler
     {
         return $this->bootstrappers;
     }
@@ -67,9 +67,9 @@ class Kernel
     /**
      * Get terminators
      *
-     * @return Handlers
+     * @return Handler
      */
-    public function terminators(): Handlers
+    public function terminators(): Handler
     {
         return $this->terminators;
     }
@@ -77,9 +77,9 @@ class Kernel
     /**
      * Get handlers
      *
-     * @return Handlers
+     * @return Handler
      */
-    public function handlers(): Handlers
+    public function handlers(): Handler
     {
         return $this->handlers;
     }
@@ -87,9 +87,9 @@ class Kernel
     /**
      * Get failers
      *
-     * @return Handlers
+     * @return Handler
      */
-    public function failers(): Handlers
+    public function failers(): Handler
     {
         return $this->failers;
     }
@@ -98,9 +98,9 @@ class Kernel
     /**
      * Call given handlers
      *
-     * @param Handlers $handlers
+     * @param Handler $handlers
      */
-    private function call(Handlers $handlers)
+    private function call(Handler $handlers)
     {
         foreach ($handlers->all() as $handler) {
             /** @noinspection PhpUnhandledExceptionInspection */
@@ -111,7 +111,7 @@ class Kernel
     /**
      * Bootstrap before handling the request
      */
-    public function bootstrap()
+    private function bootstrap()
     {
         $this->call($this->bootstrappers);
     }
@@ -119,7 +119,7 @@ class Kernel
     /**
      * Terminate after handling the request
      */
-    public function terminate()
+    private function terminate()
     {
         $this->call($this->terminators);
     }
@@ -127,7 +127,7 @@ class Kernel
     /**
      * Handle the request
      */
-    public function handle()
+    private function handle()
     {
         $this->call($this->handlers);
     }
@@ -137,7 +137,7 @@ class Kernel
      *
      * @param Throwable $exception
      */
-    public function fail(Throwable $exception)
+    private function fail(Throwable $exception)
     {
         $this->services->set(Throwable::class, $exception);
 
@@ -150,7 +150,7 @@ class Kernel
     public function run()
     {
         try {
-            ($this->bootstrappers)->all();
+            $this->bootstrap();
             $this->handle();
             $this->terminate();
         } catch (Throwable $exception) {
