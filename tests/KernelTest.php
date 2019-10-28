@@ -52,7 +52,7 @@ class KernelTest extends TestCase
         $services
             ->expects($this->once())
             ->method('call')
-            ->with(CallableMock::class);
+            ->with(CallableMock::class . '@__invoke');
 
         $kernel = new Kernel($services);
         $kernel->bootstrappers()->add(CallableMock::class);
@@ -68,7 +68,7 @@ class KernelTest extends TestCase
         $services
             ->expects($this->once())
             ->method('call')
-            ->with(CallableMock::class);
+            ->with(CallableMock::class . '@__invoke');
 
         $kernel = new Kernel($services);
         $kernel->handlers()->add(CallableMock::class);
@@ -84,7 +84,7 @@ class KernelTest extends TestCase
         $services
             ->expects($this->once())
             ->method('call')
-            ->with(CallableMock::class);
+            ->with(CallableMock::class . '@__invoke');
 
         $kernel = new Kernel($services);
         $kernel->terminators()->add(CallableMock::class);
@@ -113,7 +113,7 @@ class KernelTest extends TestCase
         $services
             ->expects($this->at(2))
             ->method('call')
-            ->with(CallableMock::class);
+            ->with(CallableMock::class . '@__invoke');
 
         $kernel = new Kernel($services);
         $kernel->failers()->add(CallableMock::class);

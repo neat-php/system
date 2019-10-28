@@ -38,10 +38,10 @@ class Kernel
     public function __construct(Container $services = null)
     {
         $this->services      = $services ?? new Container();
-        $this->bootstrappers = new Handler(self::BOOTSTRAPPERS);
-        $this->terminators   = new Handler(self::TERMINATORS);
-        $this->handlers      = new Handler(self::HANDLERS);
-        $this->failers       = new Handler(self::FAILERS);
+        $this->bootstrappers = new Handler(static::BOOTSTRAPPERS);
+        $this->terminators   = new Handler(static::TERMINATORS);
+        $this->handlers      = new Handler(static::HANDLERS);
+        $this->failers       = new Handler(static::FAILERS);
     }
 
     /**
@@ -103,6 +103,10 @@ class Kernel
     private function call(Handler $handlers)
     {
         foreach ($handlers->all() as $handler) {
+            if (is_string($handler)) {
+                $handler .= '@__invoke';
+            }
+
             /** @noinspection PhpUnhandledExceptionInspection */
             $this->services->call($handler);
         }
