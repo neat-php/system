@@ -7,6 +7,7 @@ use Neat\System\Kernel;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use Throwable;
 
 class KernelTest extends TestCase
 {
@@ -42,6 +43,9 @@ class KernelTest extends TestCase
         $this->assertSame($services, $kernel->services());
     }
 
+    /**
+     * Test bootstrap
+     */
     public function testBootstrap()
     {
         $services = $this->services();
@@ -55,25 +59,25 @@ class KernelTest extends TestCase
         $kernel->run();
     }
 
-    public function testFail()
+    /**
+     * Test handle
+     */
+    public function testHandle()
     {
         $services = $this->services();
-
-        $kernel = new Kernel($services);
-        $kernel->failers()->add(CallableMock::class);
-        $kernel->run();
-
         $services
             ->expects($this->once())
             ->method('call')
             ->with(CallableMock::class);
 
-        $kernel->handlers()->add(function () {
-            throw new RuntimeException('Failed!');
-        });
+        $kernel = new Kernel($services);
+        $kernel->handlers()->add(CallableMock::class);
         $kernel->run();
     }
 
+    /**
+     * Test terminate
+     */
     public function testTerminate()
     {
         $services = $this->services();
@@ -87,16 +91,33 @@ class KernelTest extends TestCase
         $kernel->run();
     }
 
-    public function testHandle()
+    /**
+     * Test fail
+     */
+    public function testFail()
     {
+        $failure = function (): RuntimeException {
+            throw new RuntimeException('Failed!');
+        };
+
         $services = $this->services();
         $services
-            ->expects($this->once())
+            ->expects($this->at(0))
+            ->method('call')
+            ->with($failure)
+            ->willThrowException($exception = new RuntimeException('Failed!'));
+        $services
+            ->expects($this->at(1))
+            ->method('set')
+            ->with(Throwable::class, $exception);
+        $services
+            ->expects($this->at(2))
             ->method('call')
             ->with(CallableMock::class);
 
         $kernel = new Kernel($services);
-        $kernel->handlers()->add(CallableMock::class);
+        $kernel->failers()->add(CallableMock::class);
+        $kernel->handlers()->add($failure);
         $kernel->run();
     }
 
