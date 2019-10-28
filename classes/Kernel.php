@@ -12,8 +12,8 @@ class Kernel
 {
     const BOOTSTRAPPERS = [];
     const TERMINATORS = [];
-    const HANDLER = [];
-    const FAILER = [];
+    const HANDLERS = [];
+    const FAILERS = [];
 
     /** @var Container */
     protected $services;
