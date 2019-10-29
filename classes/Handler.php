@@ -70,6 +70,17 @@ class Handler
     }
 
     /**
+     * Replace handler
+     *
+     * @param callable|string $handler
+     * @param callable|string $replacement
+     */
+    public function replace($handler, $replacement)
+    {
+        array_splice($this->handlers, $this->offset($handler), 1, [$replacement]);
+    }
+
+    /**
      * Get handler offset
      *
      * @param callable|string $handler
