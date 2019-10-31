@@ -10,30 +10,38 @@ use Throwable;
  */
 class Kernel
 {
-    /** @var array */
-    const PLUGINS = [];
+    const BOOTSTRAPPERS = [];
+    const TERMINATORS = [];
+    const HANDLERS = [];
+    const FAILERS = [];
 
     /** @var Container */
     protected $services;
 
-    /** @var string[] */
-    protected $plugins = [];
+    /** @var Handler */
+    protected $bootstrappers;
 
-    /** @var object[] */
-    protected $objects = [];
+    /** @var Handler */
+    protected $terminators;
+
+    /** @var Handler */
+    protected $handlers;
+
+    /** @var Handler */
+    protected $failers;
 
     /**
      * Constructor
      *
      * @param Container|null $services
-     * @param string[]       $plugins
      */
-    public function __construct(Container $services = null, array $plugins = null)
+    public function __construct(Container $services = null)
     {
-        $this->services = $services ?? new Container();
-        foreach ($plugins ?? static::PLUGINS as $plugin) {
-            $this->add($plugin);
-        }
+        $this->services      = $services ?? new Container();
+        $this->bootstrappers = new Handler(static::BOOTSTRAPPERS);
+        $this->terminators   = new Handler(static::TERMINATORS);
+        $this->handlers      = new Handler(static::HANDLERS);
+        $this->failers       = new Handler(static::FAILERS);
     }
 
     /**
@@ -47,116 +55,60 @@ class Kernel
     }
 
     /**
-     * Get all plugins
+     * Get bootstrappers
      *
-     * @return array
+     * @return Handler
      */
-    public function all(): array
+    public function bootstrappers(): Handler
     {
-        return $this->plugins;
+        return $this->bootstrappers;
     }
 
     /**
-     * Add plugin
+     * Get terminators
      *
-     * @param string $plugin
+     * @return Handler
      */
-    public function add(string $plugin)
+    public function terminators(): Handler
     {
-        $this->plugins[] = $plugin;
+        return $this->terminators;
     }
 
     /**
-     * Has plugin?
+     * Get handlers
      *
-     * @param string $plugin
-     * @return bool
+     * @return Handler
      */
-    public function has(string $plugin)
+    public function handlers(): Handler
     {
-        return in_array($plugin, $this->plugins);
+        return $this->handlers;
     }
 
     /**
-     * Insert plugin
+     * Get failers
      *
-     * @param string $plugin
-     * @param int    $offset
+     * @return Handler
      */
-    public function insert($plugin, int $offset = 0)
+    public function failers(): Handler
     {
-        array_splice($this->plugins, $offset, 0, [$plugin]);
+        return $this->failers;
     }
 
+    /** @noinspection PhpDocMissingThrowsInspection */
     /**
-     * Remove plugin
+     * Call given handlers
      *
-     * @param string $plugin
+     * @param Handler $handlers
      */
-    public function remove($plugin)
+    private function call(Handler $handlers)
     {
-        array_splice($this->plugins, $this->offset($plugin), 1);
-    }
+        foreach ($handlers->all() as $handler) {
+            if (is_string($handler)) {
+                $handler .= '@__invoke';
+            }
 
-    /**
-     * Replace plugin
-     *
-     * @param string $plugin
-     * @param string $replacement
-     */
-    public function replace($plugin, $replacement)
-    {
-        array_splice($this->plugins, $this->offset($plugin), 1, [$replacement]);
-    }
-
-    /**
-     * Get plugin offset
-     *
-     * @param string $plugin
-     * @return int
-     */
-    public function offset($plugin): int
-    {
-        $offset = array_search($plugin, $this->plugins);
-        if ($offset === false) {
-            throw new PluginNotFoundException('Plugin not found: ' . $plugin);
-        }
-
-        return $offset;
-    }
-
-    /**
-     * Get plugin offset to insert before
-     *
-     * @param string $plugin
-     * @return int
-     */
-    public function before($plugin): int
-    {
-        return $this->offset($plugin);
-    }
-
-    /**
-     * Get plugin offset to insert after
-     *
-     * @param string $plugin
-     * @return int
-     */
-    public function after($plugin): int
-    {
-        return $this->offset($plugin) + 1;
-    }
-
-    /**
-     * Get plugin objects
-     *
-     * @return iterable|object[]
-     */
-    public function objects()
-    {
-        foreach ($this->plugins as $plugin) {
-            yield $this->objects[$plugin]
-                ?? $this->objects[$plugin] = $this->services->get($plugin);
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $this->services->call($handler);
         }
     }
 
@@ -165,11 +117,7 @@ class Kernel
      */
     private function bootstrap()
     {
-        foreach ($this->objects() as $object) {
-            if ($object instanceof Bootstrap) {
-                $object->bootstrap();
-            }
-        }
+        $this->call($this->bootstrappers);
     }
 
     /**
@@ -177,11 +125,7 @@ class Kernel
      */
     private function terminate()
     {
-        foreach ($this->objects() as $object) {
-            if ($object instanceof Terminate) {
-                $object->terminate();
-            }
-        }
+        $this->call($this->terminators);
     }
 
     /**
@@ -189,11 +133,7 @@ class Kernel
      */
     private function handle()
     {
-        foreach ($this->objects() as $object) {
-            if ($object instanceof Handle) {
-                $object->handle();
-            }
-        }
+        $this->call($this->handlers);
     }
 
     /**
@@ -205,11 +145,7 @@ class Kernel
     {
         $this->services->set(Throwable::class, $exception);
 
-        foreach ($this->objects() as $object) {
-            if ($object instanceof Fail) {
-                $object->fail($exception);
-            }
-        }
+        $this->call($this->failers);
     }
 
     /**

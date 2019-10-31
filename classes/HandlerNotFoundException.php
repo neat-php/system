@@ -4,6 +4,6 @@ namespace Neat\System;
 
 use RuntimeException;
 
-class PluginNotFoundException extends RuntimeException
+class HandlerNotFoundException extends RuntimeException
 {
 }
