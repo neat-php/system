@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2019-10-31
+### Changed
+- Revert new kernel implementation using plugins and interfaces instead of callable handlers.
+- Reintroduced Handler class.
+- Reintroduced bootstrappers, handlers, terminators and failers methods in kernel.
+
 ## [0.2.0] - 2019-10-31
 ### Changed
 - New kernel implementation using plugins and interfaces instead of callable handlers.
