@@ -5,8 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.2.0] - 2019-10-31
 ### Changed
 - New kernel implementation using plugins and interfaces instead of callable handlers.
+- Removed Handler class.
+- Removed bootstrappers, handlers, terminators and failers methods from kernel.
 
 ## [0.1.2] - 2019-10-29
 ### Added
