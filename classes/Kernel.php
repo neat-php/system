@@ -38,7 +38,7 @@ class Kernel
     public function __construct(Container $services = null)
     {
         $this->services = $services ?? new Container();
-        $this->services->set(Container::class, $services);
+        $this->services->set(Container::class, $this->services);
 
         $this->bootstrappers = new Handler(static::BOOTSTRAPPERS);
         $this->terminators   = new Handler(static::TERMINATORS);
