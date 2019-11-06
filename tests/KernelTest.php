@@ -23,17 +23,6 @@ class KernelTest extends TestCase
     }
 
     /**
-     * Test services instance
-     */
-    public function testServices()
-    {
-        $services = new Container();
-        $kernel   = new Kernel($services);
-
-        $this->assertSame($services, $kernel->services());
-    }
-
-    /**
      * Test bootstrap
      */
     public function testBootstrap()

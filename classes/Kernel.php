@@ -46,16 +46,6 @@ class Kernel
     }
 
     /**
-     * Get service container
-     *
-     * @return Container
-     */
-    public function services(): Container
-    {
-        return $this->services;
-    }
-
-    /**
      * Get bootstrappers
      *
      * @return Handler

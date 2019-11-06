@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Kernel now requires a container instance in its constructor.
 - Container self-injection configuration got moved to the boot method.
 
+### Removed
+- Kernel services method.
+
 ## [0.4.3] - 2019-11-05
 ### Fixed
 - Register the container for self-injection.
