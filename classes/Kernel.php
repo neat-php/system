@@ -33,12 +33,11 @@ class Kernel
     /**
      * Constructor
      *
-     * @param Container|null $services
+     * @param Container $services
      */
-    public function __construct(Container $services = null)
+    public function __construct(Container $services)
     {
-        $this->services = $services ?? new Container();
-        $this->services->set(Container::class, $this->services);
+        $this->services = $services;
 
         $this->bootstrappers = new Handler(static::BOOTSTRAPPERS);
         $this->terminators   = new Handler(static::TERMINATORS);
@@ -169,7 +168,10 @@ class Kernel
      */
     public static function boot()
     {
-        $kernel = new static();
+        $services = new Container();
+        $services->set(Container::class, $services);
+
+        $kernel = new static($services);
         $kernel->run();
     }
 }

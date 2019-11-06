@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Kernel now requires a container instance in its constructor.
+- Container self-injection configuration got moved to the boot method.
 
 ## [0.4.3] - 2019-11-05
 ### Fixed

@@ -23,16 +23,6 @@ class KernelTest extends TestCase
     }
 
     /**
-     * Test empty
-     */
-    public function testEmpty()
-    {
-        $kernel = new Kernel();
-
-        $this->assertInstanceOf(Container::class, $kernel->services());
-    }
-
-    /**
      * Test services instance
      */
     public function testServices()
