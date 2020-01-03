@@ -93,6 +93,10 @@ class Modules
      */
     public function get(string $name)
     {
+        if (!isset($this->classes[$name])) {
+            throw new ModuleNotFoundException("Module not found: {$name}");
+        }
+
         return $this->modules[$name]
             ?? $this->modules[$name] = $this->container->getOrCreate($this->classes[$name]);
     }

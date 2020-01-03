@@ -3,6 +3,7 @@
 namespace Neat\System\Test;
 
 use Neat\Service\Container;
+use Neat\System\ModuleNotFoundException;
 use Neat\System\Services;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -121,5 +122,14 @@ class ModulesTest extends TestCase
         $modules->map(function (Services $module) use ($container) {
             $module->services($container);
         });
+    }
+
+    public function testThrowsNotFoundException()
+    {
+        $this->expectException(ModuleNotFoundException::class);
+        $this->expectErrorMessage("Module not found: unknown");
+
+        $modules = new Modules($this->container());
+        $modules->get('unknown');
     }
 }
