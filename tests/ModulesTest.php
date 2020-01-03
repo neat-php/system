@@ -127,7 +127,7 @@ class ModulesTest extends TestCase
     public function testThrowsNotFoundException()
     {
         $this->expectException(ModuleNotFoundException::class);
-        $this->expectErrorMessage("Module not found: unknown");
+        $this->expectExceptionMessage("Module not found: unknown");
 
         $modules = new Modules($this->container());
         $modules->get('unknown');
