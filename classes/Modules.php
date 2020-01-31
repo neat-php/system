@@ -3,6 +3,8 @@
 namespace Neat\System;
 
 use Neat\Service\Container;
+use ReflectionClass;
+use ReflectionException;
 use ReflectionFunction;
 
 class Modules
@@ -13,6 +15,9 @@ class Modules
     /** @var string[] */
     protected $classes;
 
+    /** @var string[] */
+    protected $paths;
+
     /** @var object[] */
     protected $modules;
 
@@ -21,11 +26,13 @@ class Modules
      *
      * @param Container $container
      * @param string[]  $classes
+     * @param string[]  $paths
      */
-    public function __construct(Container $container, array $classes = [])
+    public function __construct(Container $container, array $classes = [], array $paths = [])
     {
         $this->container = $container;
         $this->classes   = $classes;
+        $this->paths     = $paths;
         $this->modules   = [];
     }
 
@@ -47,6 +54,18 @@ class Modules
     public function classes()
     {
         return $this->classes;
+    }
+
+    /**
+     * Get module paths indexed by name
+     *
+     * @return string[]
+     */
+    public function paths()
+    {
+        array_map([$this, 'path'], $this->names());
+
+        return $this->paths;
     }
 
     /**
@@ -99,6 +118,33 @@ class Modules
 
         return $this->modules[$name]
             ?? $this->modules[$name] = $this->container->getOrCreate($this->classes[$name]);
+    }
+
+    /**
+     * Get module class
+     * @param string $name
+     * @return string
+     */
+    public function class(string $name)
+    {
+        if (!isset($this->classes[$name])) {
+            throw new ModuleNotFoundException("Module not found: {$name}");
+        }
+
+        return $this->classes[$name];
+    }
+
+    /**
+     * Get module path
+     *
+     * @param string $name
+     * @return string
+     * @throws ReflectionException
+     */
+    public function path(string $name)
+    {
+        return $this->paths[$name]
+            ?? $this->paths[$name] = dirname((new ReflectionClass($this->class($name)))->getFileName());
     }
 
     /**

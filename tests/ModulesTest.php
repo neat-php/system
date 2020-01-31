@@ -8,6 +8,7 @@ use Neat\System\Services;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Neat\System\Modules;
+use ReflectionException;
 
 class ModulesTest extends TestCase
 {
@@ -27,6 +28,17 @@ class ModulesTest extends TestCase
         return [
             'blog' => Stub\BlogModule::class,
             'user' => Stub\UserModule::class,
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    protected function modulePaths(): array
+    {
+        return [
+            'blog' => '/path/to/blog',
+            'user' => '/path/to/user',
         ];
     }
 
@@ -58,6 +70,24 @@ class ModulesTest extends TestCase
         $this->assertInstanceOf(Stub\UserModule::class, $user = $modules->get('user'));
         $this->assertSame(compact('blog', 'user'), $modules->all());
         $this->assertSame(compact('blog'), $modules->implementing(Services::class));
+        $this->assertSame($classes['blog'], $modules->class('blog'));
+        $this->assertSame($classes['user'], $modules->class('user'));
+        $this->assertSame(__DIR__ . '/Stub', $modules->path('user'));
+        $this->assertEquals(['blog' => __DIR__ . '/Stub', 'user' => __DIR__ . '/Stub'], $modules->paths());
+    }
+
+    /**
+     * Test paths
+     *
+     * @throws ReflectionException
+     */
+    public function testCustomPaths()
+    {
+        $modules = new Modules($this->container(), $this->moduleClasses(), $paths = $this->modulePaths());
+
+        $this->assertEquals($paths, $modules->paths());
+        $this->assertEquals($paths['blog'], $modules->path('blog'));
+        $this->assertEquals($paths['user'], $modules->path('user'));
     }
 
     /**
@@ -124,12 +154,30 @@ class ModulesTest extends TestCase
         });
     }
 
-    public function testThrowsNotFoundException()
+    public function testGetThrowsNotFoundException()
     {
         $this->expectException(ModuleNotFoundException::class);
         $this->expectExceptionMessage("Module not found: unknown");
 
         $modules = new Modules($this->container());
         $modules->get('unknown');
+    }
+
+    public function testClassThrowsNotFoundException()
+    {
+        $this->expectException(ModuleNotFoundException::class);
+        $this->expectExceptionMessage("Module not found: unknown");
+
+        $modules = new Modules($this->container());
+        $modules->class('unknown');
+    }
+
+    public function testPathThrowsNotFoundException()
+    {
+        $this->expectException(ModuleNotFoundException::class);
+        $this->expectExceptionMessage("Module not found: unknown");
+
+        $modules = new Modules($this->container());
+        $modules->path('unknown');
     }
 }
