@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Modules class, path and paths methods.
+### Fixed
+- Modules->map() doesn't supports class/object methods.
 
 ## [0.5.1] - 2020-01-03
 ### Changed
@@ -56,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.1] - 2019-10-28
 ### Fixed
 - Calling __invoke methods on handlers.
-- Defining overridden constants on a Kernel subclass. 
+- Defining overridden constants on a Kernel subclass.
 
 ## [0.1.0] - 2019-10-28
 ### Added
