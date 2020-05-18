@@ -88,9 +88,12 @@ class Modules
      */
     public function implementing(string $interface)
     {
-        return array_filter($this->all(), function ($module) use ($interface) {
-            return $module instanceof $interface;
-        });
+        return array_filter(
+            $this->all(),
+            function ($module) use ($interface) {
+                return $module instanceof $interface;
+            }
+        );
     }
 
     /**
@@ -156,10 +159,15 @@ class Modules
      */
     public function map(callable $callback)
     {
-        $reflection = new ReflectionFunction($callback);
-        $interface  = $reflection->getNumberOfParameters()
-                    ? $reflection->getParameters()[0]->getClass()->name ?? null
-                    : null;
+        if (is_array($callback)) {
+            $classReflection = new ReflectionClass($callback[0]);
+            $reflection      = $classReflection->getMethod($callback[1]);
+        } else {
+            $reflection = new ReflectionFunction($callback);
+        }
+        $interface = $reflection->getNumberOfParameters()
+            ? $reflection->getParameters()[0]->getClass()->name ?? null
+            : null;
 
         return array_map($callback, $interface ? $this->implementing($interface) : $this->all());
     }

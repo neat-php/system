@@ -4,10 +4,11 @@ namespace Neat\System\Test;
 
 use Neat\Service\Container;
 use Neat\System\ModuleNotFoundException;
+use Neat\System\Modules;
 use Neat\System\Services;
+use Neat\System\Test\Stub\ModuleServices;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Neat\System\Modules;
 use ReflectionException;
 
 class ModulesTest extends TestCase
@@ -118,10 +119,12 @@ class ModulesTest extends TestCase
             ->willReturn($user);
 
         $modules = new Modules($container, $this->moduleClasses());
-        $modules->map(function ($module) use ($container) {
-            /** @noinspection PhpUndefinedMethodInspection */
-            $module->stuff();
-        });
+        $modules->map(
+            function ($module) use ($container) {
+                /** @noinspection PhpUndefinedMethodInspection */
+                $module->stuff();
+            }
+        );
     }
 
     /**
@@ -149,9 +152,41 @@ class ModulesTest extends TestCase
             ->willReturn($user);
 
         $modules = new Modules($container, $this->moduleClasses());
-        $modules->map(function (Services $module) use ($container) {
-            $module->services($container);
-        });
+        $modules->map(
+            function (Services $module) use ($container) {
+                $module->services($container);
+            }
+        );
+    }
+
+    /**
+     * Test map using a method (array syntax)
+     */
+    public function testMapMethod()
+    {
+        $blog = $this->getMockBuilder(Stub\BlogModule::class)->getMock();
+        $blog
+            ->expects($this->once())
+            ->method('services');
+
+        $user = $this->getMockBuilder(Stub\UserModule::class)->getMock();
+
+        $container = $this->container();
+        $container
+            ->expects($this->at(0))
+            ->method('getOrCreate')
+            ->with(Stub\BlogModule::class)
+            ->willReturn($blog);
+        $container
+            ->expects($this->at(1))
+            ->method('getOrCreate')
+            ->with(Stub\UserModule::class)
+            ->willReturn($user);
+
+        $moduleServices = new ModuleServices($container);
+
+        $modules = new Modules($container, $this->moduleClasses());
+        $modules->map([$moduleServices, 'services']);
     }
 
     public function testGetThrowsNotFoundException()
