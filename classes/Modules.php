@@ -6,6 +6,7 @@ use Neat\Service\Container;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
+use ReflectionNamedType;
 
 class Modules
 {
@@ -151,13 +152,13 @@ class Modules
     }
 
     /**
-     * Call a closure for each module that fits its first parameter
+     * Call a closure for each module that fits its first & only parameter
      *
      * @note The passed callable must not require any additional parameters
      * @param callable $callback
      * @return array
      */
-    public function map(callable $callback)
+    public function map(callable $callback): array
     {
         if (is_array($callback)) {
             $classReflection = new ReflectionClass($callback[0]);
@@ -165,10 +166,30 @@ class Modules
         } else {
             $reflection = new ReflectionFunction($callback);
         }
-        $interface = $reflection->getNumberOfParameters()
-            ? $reflection->getParameters()[0]->getClass()->name ?? null
-            : null;
+        if ($reflection->getNumberOfParameters() > 1) {
+            throw new UnmappableException("Mapping against modules doesn't support parameter injection.");
+        }
+        if ($reflection->getNumberOfParameters() === 0) {
+            throw new UnmappableException("Callback doesn't have a module parameter.");
+        }
+        $reflectionParameter = $reflection->getParameters()[0];
+        $reflectionType      = $reflectionParameter->getType();
+        if (!$reflectionType || $reflectionType->isBuiltin() && $reflectionType->getName() === 'object') {
+            return $this->mapAll($callback);
+        }
+        if ($reflectionType->isBuiltin()) {
+            throw new UnmappableException("Callback doesn't have a module parameter.");
+        }
+        if (!$reflectionType instanceof ReflectionNamedType) {
+            throw new UnmappableException("Mapping modules doesn't support intersection & union types.");
+        }
+        $interface = $reflectionType->getName();
 
         return array_map($callback, $interface ? $this->implementing($interface) : $this->all());
+    }
+
+    public function mapAll(callable $callback): array
+    {
+        return array_map($callback, $this->all());
     }
 }
