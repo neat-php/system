@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Dropped support for php 7.0.
 - Require neat/service >=0.3.1.
+### Fixed
+- Deprecation warnings for php 8+.
 
 ## [0.5.2] - 2020-05-18
 ### Added
