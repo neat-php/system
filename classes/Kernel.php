@@ -94,11 +94,6 @@ class Kernel
     private function call(Handler $handlers)
     {
         foreach ($handlers->all() as $handler) {
-            if (is_string($handler)) {
-                $handler .= '@__invoke';
-            }
-
-            /** @noinspection PhpUnhandledExceptionInspection */
             $this->services->call($handler);
         }
     }
